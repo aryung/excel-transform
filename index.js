@@ -1,24 +1,11 @@
 const XLSX = require('xlsx')
 const fs = require('fs')
 const {
-  compose,
-  keys,
-  path,
-  map,
-  toPairs,
   isNil,
   isEmpty,
-  trim,
-  split,
-  filter,
-  flatten,
-  head,
-  uniq,
   intersection,
   without,
   concat,
-  ifElse,
-  I,
   not,
   repeat,
 } = require('ramda')
@@ -29,6 +16,7 @@ const SIZE = '尺碼'
 const SHEETNAME = '資料'
 const RANGE = 'A2:M992'
 // const RANGE = 'A922:M923'
+const OUTPUTFILE = 'out.csv'
 
 // main flow
 var workbook = XLSX.readFile('source.xlsx')
@@ -38,29 +26,7 @@ ws['!ref'] = RANGE
 var oriData = XLSX.utils.sheet_to_csv(ws, { header: 1 })
 
 // 步驟一: 資料整理(先拉出出所有資料的丈量單位&資料)
-/*
-modifyData ::
- [
-  [ 'MA012S',
-    'MA012S-7',
-    'XS',
-    'Jacket',
-    [ '袖長', '肩寬', '胸寬', '腰寬', '下擺寬', '衣長', '袖寬' ],
-    [ [Array], [Array], [Array], [Array], [Array], [Array], [Array] ],
-    '袖長:62.5 肩寬:46.6 胸寬:54 腰寬:48.5 下擺寬:49 衣長:63 袖寬:20.6',
-    '袖長:62.5 肩寬:46.6 胸寬:54 腰寬:48.5 下擺寬:49 衣長:63 袖寬:20.6' 
-  ],
-  [ 'MA012S',
-    'MA012S-7',
-    'XS',
-    'Jacket',
-    [ '袖長', '肩寬', '胸寬', '腰寬', '下擺寬', '衣長', '袖寬' ],
-    [ [Array], [Array], [Array], [Array], [Array], [Array], [Array] ],
-    '袖長:62.5 肩寬:46.6 胸寬:54 腰寬:48.5 下擺寬:49 衣長:63 袖寬:20.6',
-    '袖長:62.5 肩寬:46.6 胸寬:54 腰寬:48.5 下擺寬:49 衣長:63 袖寬:20.6' 
-  ],
-]
-*/
+
 var modifyData = oriData
   .split('\n')
   .map((d) => {
@@ -110,28 +76,10 @@ var modifyData = oriData
   .filter((d) => d)
 
 // 步驟二: 資料整理(先統計出各型號的丈量單位)
-/*
-unitifyData
-{ 
-  'MA002T-7': [ '尺碼', '袖長', '肩寬', '胸寬', '腰寬', '下擺寬', '衣長', '袖寬' ],
-  'MA010R-21': [ '尺碼', '袖長', '肩寬', '胸寬', '腰寬', '下擺寬', '衣長', '袖寬' ],
-  'MA012S-7': [ '尺碼', '袖長', '肩寬', '胸寬', '腰寬', '下擺寬', '衣長', '袖寬' ],
-  'MA014S-2160': [ '尺碼', '袖長', '肩寬', '胸寬', '下擺寬', '衣長', '袖寬' ] 
-}
-*/
+
 var unitifyData = getAllModelUniqueUnits(modifyData)
 
-// console.log('modifyData', JSON.stringify(modifyData, null, 2))
-console.log('modifyData', modifyData)
-console.log('unitifyData', unitifyData)
-
 // 步驟三: 逐筆資料匯整分類(Grouping By 通用型號)
-/*
-finalData :: {
-  'MA010R-21': [['S', '12', '23', '34'], ['M', '12', '23', '34']],
-  'MA010R-22': [['S', '12', '23', '34'], ['M', '12', '23', '34']]
-}
-*/
 
 var finalData = modifyData.reduce((acc, cur) => {
   var [
@@ -158,13 +106,13 @@ var finalData = modifyData.reduce((acc, cur) => {
     }
   })
   if (acc[generalModel] === undefined) {
-    // init
+    // init acc
     return {
       ...acc,
       [generalModel]: [sizeData],
     }
   } else {
-    // insert
+    // insert acc[generalModel]
     return {
       ...acc,
       [generalModel]: concat(acc[generalModel], [sizeData]),
@@ -172,6 +120,8 @@ var finalData = modifyData.reduce((acc, cur) => {
   }
 }, {})
 
+console.log('modifyData', modifyData)
+console.log('unitifyData', unitifyData)
 console.log('final', finalData)
 
 // 步驟四: 寫入 csv 檔(組 html code)
@@ -199,7 +149,7 @@ Object.keys(finalData).map((guid) => {
 })
 
 console.log('str', str)
-fs.writeFile('out1.csv', str, function (err, data) {
+fs.writeFile(OUTPUTFILE, str, function (err, data) {
   if (err) {
     return console.log(err)
   }
@@ -207,7 +157,6 @@ fs.writeFile('out1.csv', str, function (err, data) {
 })
 
 // helper lib
-// dataset :: [model, general-model, size, product-type, array<unints>]
 function getAllModelUniqueUnits(dataset) {
   return dataset.reduce((acc, cur) => {
     var [model, generalModel, size, productType, units, ...rest] = cur
@@ -228,5 +177,5 @@ function getAllModelUniqueUnits(dataset) {
 
 // check spec if valid (檢查要排除的條件: 現況 '1000' or 空值)
 function checkUnit(d) {
-  return d === '1000' || isNil(d) ? false : true
+  return d === '1000' || isNil(d) || isEmpty(d) ? false : true
 }
