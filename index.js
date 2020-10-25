@@ -12,10 +12,8 @@ const {
 
 // parameter
 const SIZE = '尺碼'
-// const RANGE = 'A2:M10'
 const SHEETNAME = '資料'
-const RANGE = 'A2:M992'
-// const RANGE = 'A922:M923'
+const RANGE = 'A2:M2000'
 const OUTPUTFILE = 'out.csv'
 
 // main flow
@@ -129,7 +127,6 @@ console.log('final', finalData)
 var str = ''
 
 Object.keys(finalData).map((guid) => {
-  // console.log('guid', guid)
   str +=
     `${guid},` +
     `<table width="100%" border="0"><tbody><tr><td>版型建議</td><td> </td><td> </td><td> </td><td> </td><td> </td><td>單位cm</td></tr></tbody></table><table width="100%" border="1" style="font-size: 9pt; text-align:center;"><tbody><tr>`
