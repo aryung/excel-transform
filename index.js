@@ -118,9 +118,9 @@ var finalData = modifyData.reduce((acc, cur) => {
   }
 }, {})
 
-console.log('modifyData', modifyData)
-console.log('unitifyData', unitifyData)
-console.log('final', finalData)
+// console.log('modifyData', modifyData)
+// console.log('unitifyData', unitifyData)
+// console.log('final', finalData)
 
 // 步驟四: 寫入 csv 檔(組 html code)
 
