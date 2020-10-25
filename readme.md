@@ -11,14 +11,23 @@ RANGE 設愈大所需吃的記憶體愈大，故多設一點可以，不然會�
 預設第一欄呈現為「尺碼」(變數為 `const SIZE=‘尺碼’`
 
 資料欄位(source.xlsx)
+
 A:通用商品編號(Common product number)
+
 B:商品編號
+
 C:尺寸名稱(Size name)
+
 D:
+
 E:複製過來
+
 F:手動整理的結果
+
 G 之後為規格表
+
 A~E 順序請勿更動
+
 所有的丈量尺寸值以「G 欄」之後的值為基準
 
 FAQ
